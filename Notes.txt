@@ -1,0 +1,41 @@
+What happens when i run docker compose build?
+
+1. Parsing the docker-compose.yml File
+Docker Compose reads and parses the docker-compose.yml file to identify the services (db and app) and their respective configurations.
+The db service doesn't need to be built because it uses the prebuilt postgres:latest image from Docker Hub.
+The app service specifies a build section, so Docker Compose looks for a Dockerfile in the context directory (. in this case).
+
+2. Building the app Service (Using the Dockerfile)
+Since the app service specifies a build section, Docker Compose triggers a build process for the service. 
+Here’s the step-by-step flow for the Dockerfile:
+
+Step 1: Base Image (FROM python:3.9-slim)
+Docker downloads the python:3.9-slim base image (if not already available in the local cache) from Docker Hub.
+This image serves as the lightweight base for your Python application.
+Step 2: Set Working Directory (WORKDIR /app)
+Docker sets the working directory inside the container to /app.
+Any subsequent commands (like copying files or running commands) are executed relative to this directory.
+Step 3: Copy requirements.txt
+Docker copies the requirements.txt file from the host system into the container’s /app directory.
+This is needed for installing Python dependencies.
+Step 4: Install Dependencies (RUN pip install --no-cache-dir -r requirements.txt)
+Docker runs pip install to install all the dependencies listed in requirements.txt inside the container.
+The --no-cache-dir option avoids caching dependency files, reducing the image size.
+Step 5: Copy Python Script (COPY create_table.py)
+Docker copies the create_table.py file from the host system into the container’s /app directory.
+Step 6: Specify Default Command (CMD ["python", "create_table.py"])
+Docker sets the default command to run when the container starts. In this case, it will execute python create_table.py.
+
+3. Skipping the db Service Build
+Since the db service directly uses the postgres:latest image, no build process is triggered for it. Docker Compose simply ensures that the image is available locally (downloading it from Docker Hub if necessary).
+
+4. Image Caching
+If you’ve built the app service before and there haven’t been any changes to the Dockerfile or files copied into the image (requirements.txt or create_table.py), Docker will use cached layers to speed up the build process.
+If any changes are detected (e.g., a modified requirements.txt or create_table.py), Docker will rebuild the affected layers and all subsequent layers.
+
+5. Result of docker-compose build
+At the end of the process:
+A Docker image is created for the app service based on the Dockerfile.
+No image is built for the db service (it uses the prebuilt postgres:latest image).
+These images are now ready to be used when you run docker-compose up.
+

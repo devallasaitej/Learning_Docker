@@ -6,7 +6,7 @@ conn = psycopg2.connect(
     dbname="postgres",  # Default database name in PostgreSQL
     user="postgres",    # Default user
     password="mysecretpassword",  # Password from the Docker container
-    host="postgres",   # Host, since we're running the container locally
+    host="db",   # Host, since we're running the container locally
     port="5432"         # Port, mapped to localhost
 )
 
